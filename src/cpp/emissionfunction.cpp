@@ -861,13 +861,15 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
 
   //write particle list in oscar format for UrQMD/SMASH afterburner
   void EmissionFunctionArray::write_particle_list_OSC()
-  {
     printf("Writing sampled particles list to OSCAR File...\n");
 
     char filename[255] = "";
     sprintf(filename, "results/particle_list_osc.dat");
     ofstream spectraFile(filename, ios_base::out);
-
+    // Double comments will return to the original format read by urqmd-afterburner
+    spectraFile << "OSC1997A \n";
+    spectraFile << "final_id_p_x \n";
+    spectraFile << " 3DHydro       1.1  (197,    79)+(197,    79)  eqsp  0.1000E+03         1\n"; //This line doesn't seem to have to correspond to anything, so its parameters are left as default. 
     for(int ievent = 0; ievent < Nevents; ievent++)
     {
       int num_particles = particle_event_list[ievent].size();
@@ -875,9 +877,10 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
       //note only write events to file with at least one particle, else urqmd-afterburner will crash
       if (num_particles > 0)
 	{
-	  //this matches format read by afterburner here : https://github.com/jbernhard/urqmd-afterburner/tree/f532416d241c23c2c3199ee21ce3c262843fdc90
+	  ////this matches format read by afterburner here : https://github.com/jbernhard/urqmd-afterburner/tree/f532416d241c23c2c3199ee21ce3c262843fdc90
 	  //write the header
-	  spectraFile << "# " << num_particles << "\n";
+	  ////spectraFile << "# " << num_particles << "\n";
+	  spectraFile << " " << ievent << "    "  << num_particles << "         0         0\n";
 	  //spectraFile << "n pid px py pz E m x y z t" << "\n";
 	  for (int ipart = 0; ipart < num_particles; ipart++)
 	    {
@@ -892,7 +895,9 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
 	      double px = particle_event_list[ievent][ipart].px;
 	      double py = particle_event_list[ievent][ipart].py;
 	      double pz = particle_event_list[ievent][ipart].pz;
-	      spectraFile << mcid << " " << scientific <<  setw(5) << setprecision(16) << t << " " << x << " " << y << " " << z << " " << E << " " << px << " " << py << " " << pz << "\n";
+          int part_ind = ipart+1;
+	      spectraFile << " " << part_ind << " " << mcid << " " << scientific <<  setw(5) << setprecision(16) << t << " " << x << " " << y << " " << z << " " << E << " " << px << " " << py << " " << pz << "\n";
+	      ////spectraFile << mcid << " " << scientific <<  setw(5) << setprecision(16) << px << " " << py << " " << pz << " " << E << " " << m << " " << x << " " << y << " " << z << " " << t << "\n";
 	    }//ipart
 	}
     } // ievent
