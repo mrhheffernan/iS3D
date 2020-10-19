@@ -862,27 +862,28 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
   //write particle list in oscar format for UrQMD/SMASH afterburner
   void EmissionFunctionArray::write_particle_list_OSC()
   {
-    printf("Writing sampled particles list to OSCAR File...\n");
-
+    printf("Writing sampled particles list to OSCAR2013 File...\n");
     char filename[255] = "";
-    sprintf(filename, "results/particle_list_osc.dat");
+    sprintf(filename, "results/particle_list_osc0");
     ofstream spectraFile(filename, ios_base::out);
-    // Double comments will return to the original format read by urqmd-afterburner
+    
+    // Write OSCAR2013 file header
     spectraFile << "#!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge \n";
     spectraFile << "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none \n";
+
     for(int ievent = 0; ievent < Nevents; ievent++)
     {
       int num_particles = particle_event_list[ievent].size();
       
-      //note only write events to file with at least one particle, else urqmd-afterburner will crash
+      //note only write events to file with at least one particle
       if (num_particles > 0)
 	{
 	  // Changed from uriqmd-afterburner format to OSCAR2013
 	  //write the header
-      if (ievent > 0)
-      {
-	  spectraFile << "# event " << ievent << " "  << num_particles << "\n";
-      }
+      //if (ievent > 0)
+      //{
+	  spectraFile << "# event " << ievent << " out "  << num_particles << "\n";
+      //}
 	  for (int ipart = 0; ipart < num_particles; ipart++)
 	    {
 	      int mcid = particle_event_list[ievent][ipart].mcID;
@@ -896,13 +897,17 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
 	      double px = particle_event_list[ievent][ipart].px;
 	      double py = particle_event_list[ievent][ipart].py;
 	      double pz = particle_event_list[ievent][ipart].pz;
-	      double chrg = particle_event_list[ievent][ipart].charge;
+
+	      double chrg = particle_event_list[ievent][ipart].charge; // CURRENTLY JUST OUTPUTTING 0
+
           int part_ind = ipart+1;
+
 	      spectraFile << setprecision(16) <<  t << " " << x << " " << y << " " << z << " " << m << " " << E << " " << px << " " << py << " " << pz << " " << mcid << " " << part_ind << " " << chrg << "\n";
+
 	    }//ipart
 	}
 
-	spectraFile << "# event " << ievent << " end\n";
+	spectraFile << "# event " << ievent << " end 0\n";
     } // ievent
 
     spectraFile.close();

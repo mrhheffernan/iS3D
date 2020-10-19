@@ -1,4 +1,5 @@
 iS3D (c) Mike McNelis, Derek Everett, Sameed Pervaiz and Lipei Du.
+[Link to the paper](https://inspirehep.net/literature/1771521)
 
 ## Purpose
 This code can read in a freeze out surface from 3+1D viscous hydro or anisotropic
@@ -32,3 +33,6 @@ By default, input/surface.dat contains a toy freezeout surface with one cell.
 See parameters.dat for a list of compatible formats.
 
 The results will be written in the `results` directory, so this directory must exist at runtime.
+
+## Notes
+- iS3D's interpolator requires strictly increasing values, which means that it has difficulties with the low-temperature freezeout corona. Be sure to have that turned off if you want things to work smoothly.

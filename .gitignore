@@ -11,3 +11,4 @@ src/.DS_Store
 src/iS3D.e
 src/cpp/obj
 iS3D
+build/

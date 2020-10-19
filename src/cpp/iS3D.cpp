@@ -175,13 +175,13 @@ void IS3D::run_particlization(int fo_from_file)
   std::vector< std::vector< Sampled_Particle > >  particle_event_list_in;
   efa.calculate_spectra(particle_event_list_in);
 
-  //copy final particle list to memory to pass to JETSCAPE module
-  if (operation == 2)
-  {
-    cout << "Copying final event particle lists to memory" << endl;
-    cout << "Event particle list contains " << particle_event_list_in.size() << " events" << endl;
-    final_particles_ = particle_event_list_in;
-  }
+  ////copy final particle list to memory to pass to JETSCAPE module
+  //if (operation == 2)
+  //{
+  //  cout << "Copying final event particle lists to memory" << endl;
+  //  cout << "Event particle list contains " << particle_event_list_in.size() << " events" << endl;
+  //  final_particles_ = particle_event_list_in;
+  //}
 
   delete [] surf_ptr;
   delete paraRdr;
