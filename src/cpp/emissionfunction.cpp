@@ -861,6 +861,7 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
 
   //write particle list in oscar format for UrQMD/SMASH afterburner
   void EmissionFunctionArray::write_particle_list_OSC()
+  {
     printf("Writing sampled particles list to OSCAR File...\n");
 
     char filename[255] = "";
@@ -869,7 +870,7 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
     // Double comments will return to the original format read by urqmd-afterburner
     spectraFile << "OSC1997A \n";
     spectraFile << "final_id_p_x \n";
-    spectraFile << " 3DHydro       1.1  (197,    79)+(197,    79)  eqsp  0.1000E+03         1\n"; //This line doesn't seem to have to correspond to anything, so its parameters are left as default. 
+    spectraFile << " 3DHydro       1.1  (197,    79)+(197,    79)  eqsp  0.1000E+03         1\n"; //This line nominally talks about the collision system 
     for(int ievent = 0; ievent < Nevents; ievent++)
     {
       int num_particles = particle_event_list[ievent].size();
@@ -877,7 +878,7 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
       //note only write events to file with at least one particle, else urqmd-afterburner will crash
       if (num_particles > 0)
 	{
-	  ////this matches format read by afterburner here : https://github.com/jbernhard/urqmd-afterburner/tree/f532416d241c23c2c3199ee21ce3c262843fdc90
+	  // Changed from urqmd-afterburner format to OSCAR. Currently OSCAR 1997A, SMASH takes OSCAR 2013, not clear if SMASH also takes OSCAR 1997.
 	  //write the header
 	  ////spectraFile << "# " << num_particles << "\n";
 	  spectraFile << " " << ievent << "    "  << num_particles << "         0         0\n";
