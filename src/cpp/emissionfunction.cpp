@@ -868,9 +868,8 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
     sprintf(filename, "results/particle_list_osc.dat");
     ofstream spectraFile(filename, ios_base::out);
     // Double comments will return to the original format read by urqmd-afterburner
-    spectraFile << "OSC1997A \n";
-    spectraFile << "final_id_p_x \n";
-    spectraFile << " 3DHydro       1.1  (197,    79)+(197,    79)  eqsp  0.1000E+03         1\n"; //This line nominally talks about the collision system 
+    spectraFile << "#!OSCAR2013 particle_lists t x y z mass p0 px py pz pdg ID charge \n";
+    spectraFile << "# Units: fm fm fm fm GeV GeV GeV GeV GeV none none none \n";
     for(int ievent = 0; ievent < Nevents; ievent++)
     {
       int num_particles = particle_event_list[ievent].size();
@@ -878,11 +877,12 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
       //note only write events to file with at least one particle, else urqmd-afterburner will crash
       if (num_particles > 0)
 	{
-	  // Changed from urqmd-afterburner format to OSCAR. Currently OSCAR 1997A, SMASH takes OSCAR 2013, not clear if SMASH also takes OSCAR 1997.
+	  // Changed from uriqmd-afterburner format to OSCAR2013
 	  //write the header
-	  ////spectraFile << "# " << num_particles << "\n";
-	  spectraFile << " " << ievent << "    "  << num_particles << "         0         0\n";
-	  //spectraFile << "n pid px py pz E m x y z t" << "\n";
+      if (ievent > 0)
+      {
+	  spectraFile << "# event " << ievent << " "  << num_particles << "\n";
+      }
 	  for (int ipart = 0; ipart < num_particles; ipart++)
 	    {
 	      int mcid = particle_event_list[ievent][ipart].mcID;
@@ -896,11 +896,13 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
 	      double px = particle_event_list[ievent][ipart].px;
 	      double py = particle_event_list[ievent][ipart].py;
 	      double pz = particle_event_list[ievent][ipart].pz;
+	      double chrg = particle_event_list[ievent][ipart].charge;
           int part_ind = ipart+1;
-	      spectraFile << " " << part_ind << " " << mcid << " " << scientific <<  setw(5) << setprecision(16) << t << " " << x << " " << y << " " << z << " " << E << " " << px << " " << py << " " << pz << "\n";
-	      ////spectraFile << mcid << " " << scientific <<  setw(5) << setprecision(16) << px << " " << py << " " << pz << " " << E << " " << m << " " << x << " " << y << " " << z << " " << t << "\n";
+	      spectraFile << setprecision(16) <<  t << " " << x << " " << y << " " << z << " " << m << " " << E << " " << px << " " << py << " " << pz << " " << mcid << " " << part_ind << " " << chrg << "\n";
 	    }//ipart
 	}
+
+	spectraFile << "# event " << ievent << " end\n";
     } // ievent
 
     spectraFile.close();
