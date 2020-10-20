@@ -37,7 +37,7 @@ public:
   //PDG ID number
   int mcID = 0;
   // Charge
-  int charge = 0;
+  //int charge = 0;
   //mass
   double mass = 0.0;
   //milne coordinate four vector of particle production point

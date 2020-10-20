@@ -859,6 +859,134 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
     } // ievent
   }
 
+
+
+  void splitPID(int arr[], int size, int number) {
+    int tempNumber = number;
+    for (int i = 1; i <= size; i++) {
+      int index = size - i;
+      int digit = tempNumber / pow(10, index);
+      arr[i-1] = digit;
+      tempNumber = tempNumber - pow(10, index) * digit;
+    }
+  }
+
+  int compute_charge(int n_q1, int n_q2, int n_q3, int signum){
+
+    int Q = 0;
+    int qarr[] = {n_q1, n_q2, n_q3};
+    // Meson
+    if (n_q1 == 0){
+      int Q1 = 3*(n_q2 % 2) -1;
+      int Q2 = -1*(3*(n_q3 % 2) -1);
+      Q = (Q1+Q2);
+    } else {
+    // Baryon
+      for (int i=0; i<(sizeof(qarr)/sizeof(qarr[0])); i++){
+        int dummy = qarr[i];
+          if (dummy == 0){
+                ;
+            } else if (dummy % 2 ==0) {
+                Q += 2;
+            } else {
+                Q += -1;
+          }
+        }
+    }
+
+    if (Q%3 != 0){
+      cout << "Problem computing charge" << endl;
+      abort();
+    }
+
+    return signum*abs(Q/-3);
+  }
+
+
+  int lepton_charge(int abspid, int signum){
+    if (abspid < 20){
+      if (abspid % 2 !=0){
+        return -1*signum;
+      } else {
+        return 0;
+      }
+    } else {
+      if (abspid == 24 | abspid == 34 | abspid == 37){
+        return 1*signum;
+      } else {
+        cout << "Exotic or unrecognized PID" << endl;
+        abort();
+      }
+    }
+  }
+
+
+  int get_charge(int pid) {
+    // Check to make manual excpetions based on relevant PDG codes
+    int absnum = abs(pid);
+    int signum = (pid > 0) - (pid < 0); 
+
+    // Get number of digits in absnum
+    int num_digits = to_string(absnum).length();
+    if (num_digits > 7){
+      //abort();
+      if (absnum == 19922219 || absnum == 1000010020 || absnum == 19932219){
+        // Manual exception based on SMASH PDG
+        return 1*signum;
+      } else {
+        cout << "Error: PDG Monte Carlo IDs in general have a max of 7 digits" << endl;
+        cout << "Provided PDG mcid: " << pid << endl;
+        return 0;
+      }
+    } else if (num_digits < 3) {
+    // Catching leptons and special particles
+      return lepton_charge(absnum,signum);
+    } else {
+    // Mesons and Baryons
+      int arr[num_digits] = {0};
+
+      splitPID(arr, num_digits, absnum);
+
+      // Expand PID to 7 digits for parsing
+      int digits_short = 7 - num_digits;
+      int pidarr[7] = {0};
+
+      for (int i=0; i<7; i++){
+        pidarr[i+digits_short] = arr[i];
+      }
+
+      // Assign values to digits
+    
+      int n = pidarr[0];
+      int n_r = pidarr[1];
+      int n_L = pidarr[2];
+      int n_q1 = pidarr[3];
+      int n_q2 = pidarr[4];
+      int n_q3 = pidarr[5];
+      int n_J = pidarr[6];
+
+      // Calculate charge
+      int charge = compute_charge(n_q1, n_q2, n_q3, signum);
+
+      // Check for negative baryon, these are manual exceptions for the SMASH PDG table
+      // These are bayons which are defined as negative with positive PDG ID, which flouts the calculation
+      int neg_baryon_array[] = {1114, 1118, 11116, 13114, 21112, 23114, 3112, 
+        3118, 203338, 13116, 1112, 3114, 3314, 1112,13112,13114,203312,11114,23112,
+        3116,13314,1116,21112,13116,21114,1118,23114,11116,103316,3118,
+        203316,9903118,203338, 3114, 3312, 3314, 3334, 5112, 5114, 5132, 
+        5312, 5314, 5332, 5334, 5512, 5514, 5532, 5534, 5554};
+      int neg_b_size = sizeof(neg_baryon_array)/sizeof(int);
+      int *end = neg_baryon_array + neg_b_size;
+      int *iffound = find(neg_baryon_array, end, absnum);
+      if (iffound != end) {
+      // Found a baryon whose particle is negatively charged
+        charge *= -1;
+      }
+      return charge;
+    }
+}
+
+
   //write particle list in oscar format for UrQMD/SMASH afterburner
   void EmissionFunctionArray::write_particle_list_OSC()
   {
@@ -898,8 +1026,7 @@ EmissionFunctionArray::EmissionFunctionArray(ParameterReader* paraRdr_in, Table*
 	      double py = particle_event_list[ievent][ipart].py;
 	      double pz = particle_event_list[ievent][ipart].pz;
 
-	      double chrg = particle_event_list[ievent][ipart].charge; // CURRENTLY JUST OUTPUTTING 0
-
+	      int chrg = get_charge(mcid);
           int part_ind = ipart+1;
 
 	      spectraFile << setprecision(16) <<  t << " " << x << " " << y << " " << z << " " << m << " " << E << " " << px << " " << py << " " << pz << " " << mcid << " " << part_ind << " " << chrg << "\n";

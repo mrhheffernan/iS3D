@@ -1460,6 +1460,7 @@ int PDG_Data::read_resonances_conventional(particle_info * particle, string pdg_
     resofile >> particle[local_i].gisospin;     //isospin degeneracy
     resofile >> particle[local_i].charge;
     resofile >> particle[local_i].decays;
+    //cout << "Charge of pdg file " << particle[local_i].charge << endl;
 
     if (particle[local_i].decays > Maxdecaychannel)
       {
